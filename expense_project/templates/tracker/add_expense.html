@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Expense{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="glass-panel p-6 mb-10">
+    <h1 class="text-2xl font-semibold text-indigo-300">Add New Expense</h1>
+    <p class="text-gray-400 mt-1">Record a new transaction in your expense tracker.</p>
+</div>
+
+<!-- FORM CARD -->
+<div class="flex justify-center">
+    <div class="glass-panel p-8 w-full max-w-2xl">
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Title -->
+            <div>
+                <label class="text-gray-300 text-sm block mb-1">Title</label>
+                {{ form.title }}
+            </div>
+
+            <!-- Amount + Category -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div>
+                    <label class="text-gray-300 text-sm block mb-1">Amount</label>
+                    {{ form.amount }}
+                </div>
+
+                <div>
+                    <label class="text-gray-300 text-sm block mb-1">Category</label>
+                    {{ form.category }}
+                </div>
+
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label class="text-gray-300 text-sm block mb-1">Date</label>
+                {{ form.date }}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="text-gray-300 text-sm block mb-1">Description</label>
+                {{ form.description }}
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-4 pt-4">
+                <button type="submit" class="f-btn w-full">Save Expense</button>
+
+                <a href="{% url 'expense_list' %}"
+                   class="w-full text-center border border-white/20 rounded-lg py-2 hover:bg-white/10 transition">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="mt-10 text-gray-400 text-sm">
+    Home / Add Expense
+</div>
+
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expense Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="glass-panel p-6 mb-8">
+    <h1 class="text-2xl font-semibold text-indigo-300 tracking-wide">Expense Dashboard</h1>
+    <p class="text-gray-300 mt-1">Track and manage your spending with precision.</p>
+</div>
+
+<!-- SMART INSIGHTS -->
+<div class="glass-panel p-6 mt-4 rounded-2xl shadow-xl border border-white/10">
+
+    <h2 class="text-2xl font-semibold mb-6 tracking-wide text-indigo-300"
+        style="text-shadow:0 0 12px rgba(157,123,255,0.5);">
+        Smart Insights
+    </h2>
+
+    {% if last_7 and last_7|length > 0 %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Total Spent -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Total (Last 7)</h4>
+            <p class="text-xl font-semibold text-indigo-300 mt-1">
+                ${{ last_7_total|floatformat:2 }}
+            </p>
+        </div>
+        
+     
+        <!-- Highest Expense -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Highest Expense</h4>
+            <p class="text-md text-gray-200 mt-1">{{ last_7_highest.title }}</p>
+            <p class="text-lg font-semibold text-pink-300">
+                ${{ last_7_highest.amount|floatformat:2 }}
+            </p>
+        </div>
+
+        <!-- Lowest Expense -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Lowest Expense</h4>
+            <p class="text-md text-gray-200 mt-1">{{ last_7_lowest.title }}</p>
+            <p class="text-lg font-semibold text-green-300">
+                ${{ last_7_lowest.amount|floatformat:2 }}
+            </p>
+        </div>
+
+        <!-- Average -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Average Per Transaction</h4>
+            <p class="text-xl font-semibold text-blue-300 mt-1">
+                ${{ last_7_avg|floatformat:2 }}
+            </p>
+        </div>
+
+        <!-- Top Category -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Top Category</h4>
+            <span class="px-3 py-1 rounded-lg text-sm bg-indigo-500/20 text-indigo-300 mt-2 inline-block">
+                {{ last_7_highest.category }}
+            </span>
+        </div>
+
+        <!-- Count -->
+        <div class="p-5 rounded-xl bg-white/5 border border-white/10 shadow-md hover:bg-white/10 transition">
+            <h4 class="text-sm text-gray-400">Transactions Count</h4>
+            <p class="text-xl font-semibold text-yellow-300 mt-1">
+                {{ last_7|length }}
+            </p>
+        </div>
+
+    </div>
+
+    {% else %}
+        <p class="text-gray-400 text-sm">Not enough data to generate insights.</p>
+    {% endif %}
+
+</div>
+
+
+<!-- FILTER SECTION -->
+<div class="glass-panel p-6 mb-8 mt-6">
+    <h2 class="text-lg font-medium text-indigo-300 mb-4">Filter Expenses</h2>
+
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        <!-- Start Date -->
+        <div>
+            <label class="text-gray-300 text-sm">Start Date</label>
+            <input type="date" name="start_date" value="{{ start_date }}"
+                   class="f-input mt-1">
+        </div>
+
+        <!-- End Date -->
+        <div>
+            <label class="text-gray-300 text-sm">End Date</label>
+            <input type="date" name="end_date" value="{{ end_date }}"
+                   class="f-input mt-1">
+        </div>
+
+        <!-- Category -->
+        <div>
+            <label class="text-gray-300 text-sm">Category</label>
+            <select name="category" class="f-input mt-1">
+                <option value="All">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+                        {{ cat }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-end gap-4">
+            <button type="submit" class="f-btn w-full">Filter</button>
+            <a href="{% url 'expense_list' %}"
+               class="w-full text-center border border-white/20 rounded-lg py-2 hover:bg-white/10 transition">
+               Reset
+            </a>
+        </div>
+
+    </form>
+</div>
+
+
+<!-- TOTAL EXPENSES -->
+<div class="glass-panel p-6 mb-10 text-center">
+    <h2 class="text-xl font-semibold text-indigo-300">Total Expenses: ${{ total|floatformat:2 }}</h2>
+    <p class="text-gray-400 mt-1">Across all categories</p>
+</div>
+
+
+<!-- DOWNLOAD PDF BUTTON -->
+<div class="text-center mb-10">
+    <a href="{% url 'export_pdf' %}" class="f-btn inline-block">
+        Download PDF
+    </a>
+</div>
+
+
+<!-- EXPENSE TABLE -->
+{% if expenses %}
+<div class="glass-panel p-0 overflow-hidden">
+    <div class="px-6 py-4 border-b border-white/10">
+        <h2 class="text-lg font-medium text-indigo-300">Recent Expenses</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-gray-300">
+            <thead class="bg-black/40 border-b border-white/10 text-gray-300">
+                <tr class="text-sm">
+                    <th class="py-3 px-6">Date</th>
+                    <th class="py-3 px-6">Title</th>
+                    <th class="py-3 px-6">Category</th>
+                    <th class="py-3 px-6 text-right">Amount</th>
+                    <th class="py-3 px-6">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for expense in expenses %}
+                <tr class="hover:bg-white/5 transition">
+                    <td class="py-3 px-6">{{ expense.date }}</td>
+                    <td class="py-3 px-6">{{ expense.title }}</td>
+
+                    <!-- CATEGORY TAG -->
+                    <td class="py-3 px-6">
+                        {% if expense.category == 'Food' %}
+                        <span class="px-3 py-1 rounded-md text-sm" style="background:rgba(0,200,120,0.18); color:#75ffbc;">
+                            {{ expense.category }}
+                        </span>
+
+                        {% elif expense.category == 'Travel' %}
+                        <span class="px-3 py-1 rounded-md text-sm" style="background:rgba(70,150,255,0.18); color:#8ecbff;">
+                            {{ expense.category }}
+                        </span>
+
+                        {% elif expense.category == 'Shopping' %}
+                        <span class="px-3 py-1 rounded-md text-sm" style="background:rgba(255,180,80,0.18); color:#ffd59a;">
+                            {{ expense.category }}
+                        </span>
+
+                        {% elif expense.category == 'Bills' %}
+                        <span class="px-3 py-1 rounded-md text-sm" style="background:rgba(255,80,80,0.20); color:#ffaaaa;">
+                            {{ expense.category }}
+                        </span>
+
+                        {% else %}
+                        <span class="px-3 py-1 rounded-md text-sm" style="background:rgba(160,160,160,0.20); color:#dddddd;">
+                            {{ expense.category }}
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- AMOUNT -->
+                    <td class="py-3 px-6 text-right font-medium text-indigo-300">
+                        ${{ expense.amount|floatformat:2 }}
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td class="py-3 px-6 flex gap-3">
+                        <a href="{% url 'edit_expense' expense.pk %}"
+                           class="px-3 py-1 border border-indigo-400 text-indigo-300 rounded-md hover:bg-indigo-400 hover:text-black transition text-sm">
+                           Edit
+                        </a>
+
+                        <a href="{% url 'delete_expense' expense.pk %}"
+                           class="px-3 py-1 border border-red-400 text-red-300 rounded-md hover:bg-red-400 hover:text-black transition text-sm">
+                           Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+{% else %}
+
+<div class="glass-panel text-center p-12 mt-6">
+    <p class="text-gray-400 text-lg">No expenses found.</p>
+    <a href="{% url 'add_expense' %}" class="f-btn mt-4 inline-block">
+        Add Your First Expense
+    </a>
+</div>
+
+{% endif %}
+
+<!-- BREADCRUMB -->
+<nav class="mt-8">
+    <p class="text-gray-400 text-sm">Home / Expenses</p>
+</nav>
+
+{% endblock %}
