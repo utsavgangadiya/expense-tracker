@@ -44,6 +44,12 @@ A full-featured, production-ready **Personal Expense Tracker** web application b
 
 ---
 
+**Budget Dashboard**
+
+![Budget Dashboard](screenshots/budget.png)
+
+---
+
 ## ✨ Features
 
 | Feature | Description |
