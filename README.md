@@ -20,11 +20,6 @@ A full-featured, production-ready **Personal Expense Tracker** web application b
 
 ---
 
-**Sign Up Page**
-
-![Sign Up Page](screenshots/signup.png)
-
----
 
 **Expense Dashboard**
 
@@ -346,11 +341,6 @@ Visit `/export-pdf/` to download a complete expense report as PDF, rendered via 
 
 ---
 
-## 📜 License
-
-Open-source under the [MIT License](LICENSE).
-
----
 
 ## 👤 Author
 
@@ -359,7 +349,7 @@ Open-source under the [MIT License](LICENSE).
 - 🎓 Student & Django Developer
 - 🌐 Live Project: [utsavgangadiya.pythonanywhere.com](https://utsavgangadiya.pythonanywhere.com/accounts/login/?next=/)
 - 🐙 GitHub: [@utsavgangadiya](https://github.com/utsavgangadiya)
-- 📧 Email: utsavpatel@gmail.com
+- 📧 Email: utsavgangadiya886@gmail.com
 
 ---
 
