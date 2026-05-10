@@ -12,8 +12,8 @@
 </div>
 
 <!-- FORM CARD -->
-<div class="flex justify-center">
-    <div class="glass-panel p-8 w-full max-w-2xl">
+<div class="flex justify-center px-4 sm:px-0">
+    <div class="glass-panel p-6 sm:p-8 w-full max-w-2xl">
 
         <form method="post" class="space-y-6">
             {% csrf_token %}
@@ -56,7 +56,7 @@
                 <button type="submit" class="f-btn w-full">Save Expense</button>
 
                 <a href="{% url 'expense_list' %}"
-                   class="w-full text-center border border-white/20 rounded-lg py-2 hover:bg-white/10 transition">
+                    class="w-full text-center border border-white/20 rounded-lg py-2 hover:bg-white/10 transition">
                     Cancel
                 </a>
             </div>

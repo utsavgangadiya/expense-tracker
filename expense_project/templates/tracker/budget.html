@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budget - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header & Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Title Card -->
+        <div class="glass-panel p-6 col-span-1 md:col-span-2 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Budget Management</h1>
+                <p class="text-gray-400">Track monthly limits for {{ current_month|date:"F Y" }}</p>
+            </div>
+            <a href="{% url 'add_budget' %}" class="f-btn flex w-full max-w-xs items-center justify-center gap-2 px-5 py-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Set New Budget
+            </a>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="glass-panel p-6 bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border-indigo-500/30">
+            <p class="text-gray-400 text-sm mb-1">Total Budgeted</p>
+            <h2 class="text-3xl font-bold text-white">${{ total_budgeted|floatformat:0 }}</h2>
+            <div class="w-full bg-gray-700 h-1 mt-3 rounded-full overflow-hidden">
+                <div class="bg-indigo-500 h-full" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 bg-gradient-to-br from-gray-900/40 to-gray-800/40">
+            <p class="text-gray-400 text-sm mb-1">Total Spent (Categories)</p>
+            <h2 class="text-3xl font-bold text-white">${{ current_month_total|floatformat:0 }}</h2>
+            <p class="text-xs text-gray-500 mt-2">Across all budgeted categories</p>
+        </div>
+    </div>
+
+    <!-- Budgets Grid -->
+    {% if budgets %}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for item in budgets %}
+        <div class="glass-panel p-6 relative group transition hover:border-indigo-500/30">
+            <!-- Card Header -->
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                        <!-- Icon mapping could go here, using generic for now -->
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-white">{{ item.budget.category }}</h3>
+                        <p class="text-xs text-gray-500">{{ item.percentage|floatformat:0 }}% Used</p>
+                    </div>
+                </div>
+
+                <!-- Actions Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-white p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
+                            </path>
+                        </svg>
+                    </button>
+                    <div x-show="open"
+                        class="absolute right-0 mt-2 w-32 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-10 overflow-hidden"
+                        style="display: none;">
+                        <a href="{% url 'edit_budget' item.budget.pk %}"
+                            class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white">Edit</a>
+                        <a href="{% url 'delete_budget' item.budget.pk %}"
+                            class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300">Delete</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-4">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-400">${{ item.spent|floatformat:0 }} Spent</span>
+                    <span class="text-white font-medium">${{ item.budget.amount|floatformat:0 }} Limit</span>
+                </div>
+                <div class="w-full bg-gray-700 h-3 rounded-full overflow-hidden">
+                    <div class="h-full transition-all duration-500 {% if item.status == 'safe' %}bg-green-500{% elif item.status == 'warning' %}bg-yellow-500{% else %}bg-red-500{% endif %}"
+                        style="width: {{ item.percentage }}%"></div>
+                </div>
+            </div>
+
+            <!-- Status Text -->
+            <div class="flex justify-between items-center text-xs">
+                {% if item.remaining >= 0 %}
+                <span class="text-gray-400">
+                    Remaining:
+                    <span class="text-white font-medium">
+                        ${{ item.remaining|floatformat:2 }}
+                    </span>
+                </span>
+                {% else %}
+                <span class="text-red-400 font-medium">
+                    Over Budget by ${{ item.remaining_abs|floatformat:2 }}
+                </span>
+                {% endif %}
+
+                {% if item.status == 'safe' %}
+                <span class="px-2 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/20">On
+                    Track</span>
+                {% elif item.status == 'warning' %}
+                <span
+                    class="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/20">Careful</span>
+                {% else %}
+                <span class="px-2 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/20">Exceeded</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="glass-panel p-12 text-center">
+        <div
+            class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
+            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                </path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">No Budgets Set</h3>
+        <p class="text-gray-400 mb-6">Start tracking your spending limits by creating your first budget.</p>
+        <a href="{% url 'add_budget' %}" class="f-btn inline-flex items-center gap-2">
+            Create First Budget
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Alpine.js for dropdowns (if not already included in base, adding tiny inline script) -->
+<script src="//unpkg.com/alpinejs" defer></script>
+{% endblock %}

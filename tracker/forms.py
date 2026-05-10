@@ -1,6 +1,6 @@
 # tracker/forms.py
 from django import forms
-from .models import Expense
+from .models import Expense, Budget
 
 class ExpenseForm(forms.ModelForm):
 
@@ -28,5 +28,20 @@ class ExpenseForm(forms.ModelForm):
                 'class': 'f-input',
                 'placeholder': 'Enter description',
                 'rows': 3
+            }),
+        }
+
+class BudgetForm(forms.ModelForm):
+    class Meta:
+        model = Budget
+        fields = ['category', 'amount']
+        
+        widgets = {
+            'category': forms.Select(attrs={
+                'class': 'f-input'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'f-input',
+                'placeholder': 'Enter monthly budget limit'
             }),
         }

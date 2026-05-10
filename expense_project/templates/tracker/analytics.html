@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Expense Tracker{% endblock %}
+
+{% block content %}
+<!-- Safe edge padding for mobile -->
+<div class="space-y-4 sm:space-y-6 px-3 sm:px-0">
+    
+    <!-- Page Header -->
+    <div class="glass-panel p-4 sm:p-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">Analytics Dashboard</h1>
+        <p class="text-gray-400 text-sm">Visualize your spending patterns and insights</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Total Spent -->
+        <div class="glass-panel p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-gray-400 text-xs mb-0.5">Total Spent</p>
+                    <h3 class="font-bold text-white truncate" style="font-size: clamp(1rem, 4vw, 1.125rem);">
+                        ${{ total_spent|floatformat:2 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Expenses -->
+        <div class="glass-panel p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-gray-400 text-xs mb-0.5">Total Expenses</p>
+                    <h3 class="font-bold text-white truncate" style="font-size: clamp(1rem, 4vw, 1.125rem);">
+                        {{ expense_count }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Average Expense -->
+        <div class="glass-panel p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-gray-400 text-xs mb-0.5">Average Expense</p>
+                    <h3 class="font-bold text-white truncate" style="font-size: clamp(1rem, 4vw, 1.125rem);">
+                        ${{ avg_expense|floatformat:2 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Category Breakdown -->
+        <div class="glass-panel p-4">
+            <h2 class="text-lg font-semibold text-white mb-3">Category Breakdown</h2>
+            <div class="w-full h-64 sm:h-72">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Monthly Trend -->
+        <div class="glass-panel p-4">
+            <h2 class="text-lg font-semibold text-white mb-3">Monthly Spending Trend</h2>
+            <div class="w-full h-64 sm:h-72">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Expenses -->
+    <div class="glass-panel p-4">
+        <h2 class="text-lg font-semibold text-white mb-3">Top 5 Expenses</h2>
+        <div class="space-y-2">
+            {% for expense in top_expenses %}
+            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition">
+                <div class="w-7 h-7 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold text-xs">
+                    {{ forloop.counter }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-white text-sm truncate">{{ expense.title }}</h3>
+                    <p class="text-[10px] text-gray-400 truncate">{{ expense.category }} • {{ expense.date }}</p>
+                </div>
+                <div class="flex-shrink-0 text-right">
+                    <p class="text-sm font-bold text-white">${{ expense.amount|floatformat:2 }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-center py-6 text-sm">No expenses yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // Category Breakdown Pie Chart
+    try {
+        const categoryData = JSON.parse('{{ category_data|escapejs }}');
+        if (categoryData && categoryData.length > 0) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryData.map(item => item.category),
+                    datasets: [{
+                        data: categoryData.map(item => parseFloat(item.total)),
+                        backgroundColor: [
+                            'rgba(108, 92, 231, 0.8)', 'rgba(187, 80, 255, 0.8)',
+                            'rgba(255, 112, 166, 0.8)', 'rgba(52, 211, 153, 0.8)',
+                            'rgba(251, 191, 36, 0.8)', 'rgba(96, 165, 250, 0.8)',
+                            'rgba(248, 113, 113, 0.8)', 'rgba(167, 139, 250, 0.8)',
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 2,
+                        spacing: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e0e0e0',
+                                padding: 10,
+                                font: { size: 11 },
+                                boxWidth: 10,
+                                boxHeight: 10
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        } else {
+            document.getElementById('categoryChart').parentElement.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">No category data</p>';
+        }
+    } catch (e) { console.error('Category Chart:', e); }
+
+    // Monthly Trend Bar Chart
+    try {
+        const monthlyData = JSON.parse('{{ monthly_data|escapejs }}');
+        if (monthlyData && monthlyData.length > 0) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.map(item => {
+                        const d = new Date(item.month);
+                        return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    }),
+                    datasets: [{
+                        label: 'Spending',
+                        data: monthlyData.map(item => parseFloat(item.total)),
+                        backgroundColor: [
+                            'rgba(108, 92, 231, 0.8)', 'rgba(187, 80, 255, 0.8)',
+                            'rgba(255, 112, 166, 0.8)', 'rgba(52, 211, 153, 0.8)',
+                            'rgba(251, 191, 36, 0.8)', 'rgba(96, 165, 250, 0.8)',
+                        ],
+                        borderRadius: 6,
+                        maxBarThickness: 32
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            padding: 8,
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 11 },
+                            callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(2)}` }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e0e0e0',
+                                maxTicksLimit: 4,
+                                font: { size: 10 },
+                                callback: v => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)', drawBorder: false }
+                        },
+                        x: {
+                            ticks: { color: '#e0e0e0', font: { size: 10 }, maxRotation: 45, minRotation: 45 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('monthlyChart').parentElement.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">No monthly data</p>';
+        }
+    } catch (e) { console.error('Monthly Chart:', e); }
+</script>
+{% endblock %}

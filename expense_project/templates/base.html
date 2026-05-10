@@ -19,6 +19,7 @@
     <style>
         /* Smooth premium dark gradient background */
         body {
+            min-height: 100vh;
             background: radial-gradient(circle at top, #191620, #0c0c12);
             font-family: 'Inter', sans-serif;
         }
@@ -116,6 +117,44 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6c5ce7;
         }
+
+        /* User dropdown */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: rgba(26, 20, 36, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .user-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: 0.2s;
+            display: block;
+            color: #e0e0e0;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(108, 92, 231, 0.2);
+        }
     </style>
 
 </head>
@@ -128,19 +167,78 @@
             <a href="{% url 'expense_list' %}" class="text-xl font-semibold tracking-wide text-indigo-400">
                 Expense Tracker
             </a>
-            
 
-            <div class="hidden md:flex gap-6">
+            <div class="hidden md:flex gap-6 items-center">
                 <a href="{% url 'expense_list' %}" class="hover:text-indigo-300 transition">Dashboard</a>
                 <a href="{% url 'add_expense' %}" class="hover:text-indigo-300 transition">Add Expense</a>
+                <a href="{% url 'analytics' %}" class="hover:text-indigo-300 transition">Analytics</a>
+                <a href="{% url 'budget' %}" class="hover:text-indigo-300 transition">Budget</a>
+
+                {% if user.is_authenticated %}
+                <!-- User Profile Dropdown -->
+                <div class="user-dropdown">
+                    <button class="flex items-center gap-2 hover:text-indigo-300 transition">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                            {{ user.email|first|upper }}
+                        </div>
+                        <span>{{ user.first_name|default:user.email }}</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div class="dropdown-menu">
+                        <div class="px-4 py-2 border-b border-white/10 mb-2">
+                            <p class="text-sm text-gray-400">Signed in as</p>
+                            <p class="text-sm font-semibold truncate">{{ user.email }}</p>
+                        </div>
+                        <a href="/accounts/logout/" class="dropdown-item flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
-            <button class="md:hidden text-white text-2xl">☰</button>
+            <button id="mobile-menu-button" class="md:hidden text-white bg-indigo-600/90 hover:bg-indigo-500/90 rounded-xl p-3 transition"
+                aria-controls="mobile-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 6h16"></path>
+                    <path d="M4 12h16"></path>
+                    <path d="M4 18h16"></path>
+                </svg>
+            </button>
+
+        </div>
+
+        <div id="mobile-menu" class="md:hidden hidden absolute left-0 right-0 top-full mt-2 rounded-3xl border border-white/10 bg-black/85 backdrop-blur-xl p-4 shadow-xl z-40">
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'expense_list' %}" class="block rounded-xl px-4 py-3 hover:bg-white/10 transition">Dashboard</a>
+                <a href="{% url 'add_expense' %}" class="block rounded-xl px-4 py-3 hover:bg-white/10 transition">Add Expense</a>
+                <a href="{% url 'analytics' %}" class="block rounded-xl px-4 py-3 hover:bg-white/10 transition">Analytics</a>
+                <a href="{% url 'budget' %}" class="block rounded-xl px-4 py-3 hover:bg-white/10 transition">Budget</a>
+
+                {% if user.is_authenticated %}
+                <div class="border-t border-white/10 pt-3 mt-3 text-sm text-gray-300">
+                    <div class="mb-2 font-semibold text-white">{{ user.first_name|default:user.email }}</div>
+                    <div class="truncate text-gray-400 text-xs">{{ user.email }}</div>
+                    <a href="/accounts/logout/" class="mt-3 block rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition">Logout</a>
+                </div>
+                {% else %}
+                <a href="/accounts/login/" class="mt-3 block rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition">Login</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main class="max-w-6xl mx-auto mt-28 px-4 pb-16">
+    <main class="max-w-6xl mx-auto mt-28 px-4 pb-20 sm:px-5">
         {% if messages %}
         {% for message in messages %}
         <div class="glass-panel p-4 mb-4 text-sm border border-white/10">
@@ -157,6 +255,23 @@
     <footer class="w-full text-center py-6 border-t border-white/10 bg-black/30 backdrop-blur-xl">
         A clean and intelligent expense manager — Created by Utsav
     </footer>
+
+    <script>
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (menuButton && mobileMenu) {
+            menuButton.addEventListener('click', function () {
+                const expanded = menuButton.getAttribute('aria-expanded') === 'true';
+                menuButton.setAttribute('aria-expanded', String(!expanded));
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+    <script defer src="https://unpkg.com/alpinejs@3.12.0/dist/cdn.min.js"></script>
+
+    {% block scripts %}
+    {% endblock %}
 
 </body>
 
