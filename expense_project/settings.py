@@ -158,14 +158,18 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = config('SITE_ID', default=1, cast=int)
+SITE_ID = config('SITE_ID', default=2, cast=int)
 
 # Django-allauth settings
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_LOGIN_METHODS = {"email"}
+
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "password1*",
+    "password2*",
+]
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Set to 'mandatory' for production
-ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
+
 ACCOUNT_SESSION_REMEMBER = True
 
 # Redirect URLs
@@ -188,11 +192,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         },
-        'APP': {
-            'client_id': config('GOOGLE_CLIENT_ID', default=''),
-            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
-            'key': ''
-        }
+    
     }
 }
 
